@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Build outputs and tool caches
+build/
+.dart_tool/
+.gradle/
+.kotlin/
+.idea/
+local.properties
+*.keystore
+*.jks
+key.properties
