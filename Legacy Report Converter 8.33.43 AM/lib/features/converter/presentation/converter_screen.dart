@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/exceptions/conversion_exception.dart';
 import '../data/file_picker_service.dart';
 import '../data/file_save_service.dart';
+import '../data/incoming_file_service.dart';
 import '../domain/models/conversion_result.dart';
 import '../domain/services/conversion_service.dart';
 import '../domain/services/report_decoder.dart';
@@ -23,6 +24,7 @@ class ConverterScreen extends StatefulWidget {
 class _ConverterScreenState extends State<ConverterScreen> {
   final _filePickerService = FilePickerService();
   final _fileSaveService = FileSaveService();
+  final _incomingFileService = IncomingFileService();
   final _conversionService = const ConversionService();
   final _decoder = const ReportDecoder();
 
@@ -38,6 +40,18 @@ class _ConverterScreenState extends State<ConverterScreen> {
   bool get _hasSelectedFile => _selectedFile != null;
   bool get _hasResult => _result != null;
   bool get _isBusy => _isPicking || _isConverting || _isSaving || _isSharing;
+
+  @override
+  void initState() {
+    super.initState();
+    _incomingFileService.listen(_openIncomingFile);
+  }
+
+  @override
+  void dispose() {
+    _incomingFileService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,18 +111,18 @@ class _ConverterScreenState extends State<ConverterScreen> {
     );
   }
 
-  Future<void> _pickFile({bool allowAnyFile = false}) async {
-    setState(() {
-      _isPicking = true;
-      _result = null;
-      _detectedEncoding = null;
-      _selectionWarnings = const [];
-    });
+  Future<void> _pickFile({bool allowAnyFile = false}) => _loadFile(
+    () => _filePickerService.pickReportFile(allowAnyFile: allowAnyFile),
+  );
+
+  Future<void> _openIncomingFile(Uri uri) =>
+      _loadFile(() => _incomingFileService.readFile(uri));
+
+  Future<void> _loadFile(Future<SelectedReportFile?> Function() load) async {
+    setState(() => _isPicking = true);
 
     try {
-      final file = await _filePickerService.pickReportFile(
-        allowAnyFile: allowAnyFile,
-      );
+      final file = await load();
 
       if (!mounted) {
         return;
@@ -122,6 +136,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
       final decoded = _decoder.decode(file.bytes);
       setState(() {
         _selectedFile = file;
+        _result = null;
         _detectedEncoding = decoded.encodingName;
         _selectionWarnings = [...file.warnings, ...decoded.warnings];
       });
@@ -293,7 +308,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Select a legacy report file from disk. Conversion happens locally and preserves rows, spacing, totals, page breaks, and column alignment.',
+          'Select a legacy report file from disk, or open one from WhatsApp, Files, or email with this app. Conversion happens locally and preserves rows, spacing, totals, page breaks, and column alignment.',
           style: textTheme.bodyLarge?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),

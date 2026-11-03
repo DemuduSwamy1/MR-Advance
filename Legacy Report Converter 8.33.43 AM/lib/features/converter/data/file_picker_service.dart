@@ -41,7 +41,22 @@ class FilePickerService {
       return null;
     }
 
-    final bytes = await pickedFile.readAsBytes();
+    return buildSelectedFile(
+      name: pickedFile.name,
+      uri: pickedFile.uri,
+      bytes: await pickedFile.readAsBytes(),
+      checkExtension: !allowAnyFile,
+    );
+  }
+
+  /// Validates file contents and collects warnings, for files from the picker
+  /// or shared into the app from another app.
+  SelectedReportFile buildSelectedFile({
+    required String name,
+    required Uri uri,
+    required Uint8List bytes,
+    bool checkExtension = true,
+  }) {
     if (isEmptyBytes(bytes)) {
       throw const ConversionException('The selected file is empty.');
     }
@@ -53,8 +68,8 @@ class FilePickerService {
       );
     }
 
-    final extension = _extensionFor(pickedFile.name);
-    if (!allowAnyFile &&
+    final extension = _extensionFor(name);
+    if (checkExtension &&
         extension.isNotEmpty &&
         !supportedExtensions.contains(extension)) {
       warnings.add(
@@ -63,8 +78,8 @@ class FilePickerService {
     }
 
     return SelectedReportFile(
-      name: pickedFile.name,
-      uri: pickedFile.uri,
+      name: name,
+      uri: uri,
       bytes: bytes,
       sizeInBytes: bytes.length,
       warnings: warnings,
