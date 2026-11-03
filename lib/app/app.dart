@@ -9,7 +9,7 @@ class LegacyReportConverterApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Legacy Report to PDF Converter',
+      title: 'ReportKit',
       debugShowCheckedModeBanner: false,
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),

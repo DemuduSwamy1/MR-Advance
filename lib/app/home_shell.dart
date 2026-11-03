@@ -94,7 +94,7 @@ class _HomeHeader extends StatelessWidget implements PreferredSizeWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Legacy Report Converter',
+                  'ReportKit',
                   style: textTheme.titleMedium?.copyWith(
                     color: colorScheme.onPrimary,
                     fontWeight: FontWeight.w700,

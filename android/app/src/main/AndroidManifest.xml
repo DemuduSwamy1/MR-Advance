@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="Legacy Report to PDF Converter"
+        android:label="ReportKit"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

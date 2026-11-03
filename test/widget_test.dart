@@ -5,7 +5,7 @@ void main() {
   testWidgets('converter screen renders primary actions', (tester) async {
     await tester.pumpWidget(const LegacyReportConverterApp());
 
-    expect(find.text('Legacy Report Converter'), findsOneWidget);
+    expect(find.text('ReportKit'), findsOneWidget);
     expect(find.text('Convert reports to PDF'), findsOneWidget);
     expect(find.text('Select Report File'), findsOneWidget);
     expect(find.text('Browse All Files'), findsNothing);

@@ -1,4 +1,4 @@
-# Legacy Report to PDF Converter
+# ReportKit
 
 A local-only Flutter application for converting fixed-width legacy printer report files into clean, searchable PDF documents.
 
