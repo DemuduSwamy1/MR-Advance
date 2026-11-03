@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/exceptions/conversion_exception.dart';
+import '../../../core/widgets/pdf_preview_screen.dart';
+import '../../../core/widgets/primary_action_button.dart';
 import '../data/file_picker_service.dart';
 import '../data/file_save_service.dart';
 import '../data/incoming_file_service.dart';
 import '../domain/models/conversion_result.dart';
 import '../domain/services/conversion_service.dart';
 import '../domain/services/report_decoder.dart';
-import 'pdf_preview_screen.dart';
 import 'widgets/file_selection_card.dart';
-import 'widgets/primary_action_button.dart';
 import 'widgets/warning_card.dart';
 
 class ConverterScreen extends StatefulWidget {
@@ -190,7 +190,12 @@ class _ConverterScreenState extends State<ConverterScreen> {
     }
 
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => PdfPreviewScreen(result: result)),
+      MaterialPageRoute<void>(
+        builder: (_) => PdfPreviewScreen(
+          pdfBytes: result.pdfBytes,
+          fileName: result.outputFileName,
+        ),
+      ),
     );
   }
 

@@ -19,7 +19,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create invoices'), findsOneWidget);
-    expect(find.text('Invoice generation is coming soon'), findsOneWidget);
+    expect(find.text('Bill details'), findsOneWidget);
+    expect(find.text('Generate Invoice PDF'), findsOneWidget);
 
     await tester.tap(find.text('Convert'));
     await tester.pumpAndSettle();

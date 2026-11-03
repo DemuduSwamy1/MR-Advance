@@ -1,22 +1,27 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
-import '../domain/models/conversion_result.dart';
-
 class PdfPreviewScreen extends StatelessWidget {
-  const PdfPreviewScreen({super.key, required this.result});
+  const PdfPreviewScreen({
+    super.key,
+    required this.pdfBytes,
+    required this.fileName,
+  });
 
-  final ConversionResult result;
+  final Uint8List pdfBytes;
+  final String fileName;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(result.outputFileName)),
+      appBar: AppBar(title: Text(fileName)),
       body: PdfPreview(
-        build: (_) async => result.pdfBytes,
+        build: (_) async => pdfBytes,
         initialPageFormat: PdfPageFormat.a4.landscape,
-        pdfFileName: result.outputFileName,
+        pdfFileName: fileName,
         canChangeOrientation: false,
         canChangePageFormat: false,
         allowPrinting: true,
