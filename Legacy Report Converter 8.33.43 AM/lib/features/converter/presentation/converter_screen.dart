@@ -9,7 +9,6 @@ import '../domain/models/conversion_result.dart';
 import '../domain/services/conversion_service.dart';
 import '../domain/services/report_decoder.dart';
 import 'pdf_preview_screen.dart';
-import 'widgets/conversion_summary_card.dart';
 import 'widgets/file_selection_card.dart';
 import 'widgets/primary_action_button.dart';
 import 'widgets/warning_card.dart';
@@ -91,10 +90,8 @@ class _ConverterScreenState extends State<ConverterScreen> {
                   isLoading: _isConverting,
                 ),
                 if (_result != null) ...[
-                  const SizedBox(height: 20),
-                  ConversionSummaryCard(result: _result!),
                   if (_result!.validation.warnings.isNotEmpty) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     WarningCard(warnings: _result!.validation.warnings),
                   ],
                   const SizedBox(height: 16),
