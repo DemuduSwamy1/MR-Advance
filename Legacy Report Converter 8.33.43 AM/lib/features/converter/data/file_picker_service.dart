@@ -26,15 +26,12 @@ class SelectedReportFile {
 class FilePickerService {
   static const supportedExtensions = ['txt', 'dat', 'prn', 'lis', 'out'];
 
-  Future<SelectedReportFile?> pickReportFile({
-    bool allowAnyFile = false,
-  }) async {
+  /// Lets the user pick any file, since many legacy reports have no
+  /// extension; uncommon extensions only produce a warning.
+  Future<SelectedReportFile?> pickReportFile() async {
     final pickedFile = await FilePicker.pickFile(
-      dialogTitle: allowAnyFile
-          ? 'Select legacy report file'
-          : 'Select report file',
-      type: allowAnyFile ? FileType.any : FileType.custom,
-      allowedExtensions: allowAnyFile ? null : supportedExtensions,
+      dialogTitle: 'Select report file',
+      type: FileType.any,
     );
 
     if (pickedFile == null) {
@@ -45,7 +42,6 @@ class FilePickerService {
       name: pickedFile.name,
       uri: pickedFile.uri,
       bytes: await pickedFile.readAsBytes(),
-      checkExtension: !allowAnyFile,
     );
   }
 

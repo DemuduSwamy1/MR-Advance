@@ -65,6 +65,7 @@ flutter:
 
   assets:
     - assets/fonts/RobotoMono-Regular.ttf
+    - assets/icon/app_logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

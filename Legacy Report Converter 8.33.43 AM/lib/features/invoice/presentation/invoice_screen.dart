@@ -9,7 +9,6 @@ class InvoiceScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Generate Invoice')),
       body: SafeArea(
         child: Center(
           child: Padding(

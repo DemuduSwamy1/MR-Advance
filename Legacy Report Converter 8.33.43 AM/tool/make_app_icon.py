@@ -188,6 +188,8 @@ if os.path.isdir(os.path.dirname(win_ico)):
 icon_dir = os.path.join(ROOT, "assets/icon")
 os.makedirs(icon_dir, exist_ok=True)
 render(1024).save(f"{icon_dir}/app_icon_1024.png")
+# Logo shown in the app's header.
+rounded(render(192), 0.22).save(f"{icon_dir}/app_logo.png")
 svg_paths = "\n".join(
     f'    <path fill="{c}"' + (' fill-rule="evenodd"' if e else "") + f' d="{p}"/>'
     for c, p, e in foreground)

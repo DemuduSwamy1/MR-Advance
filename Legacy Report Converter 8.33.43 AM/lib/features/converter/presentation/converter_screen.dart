@@ -59,7 +59,6 @@ class _ConverterScreenState extends State<ConverterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Legacy Report to PDF Converter')),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -73,10 +72,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
                   selectedFile: _selectedFile,
                   detectedEncoding: _detectedEncoding,
                   isLoading: _isPicking,
-                  onSelect: _isBusy ? null : () => _pickFile(),
-                  onBrowseAll: _isBusy
-                      ? null
-                      : () => _pickFile(allowAnyFile: true),
+                  onSelect: _isBusy ? null : _pickFile,
                 ),
                 if (_selectionWarnings.isNotEmpty) ...[
                   const SizedBox(height: 12),
@@ -112,9 +108,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
     );
   }
 
-  Future<void> _pickFile({bool allowAnyFile = false}) => _loadFile(
-    () => _filePickerService.pickReportFile(allowAnyFile: allowAnyFile),
-  );
+  Future<void> _pickFile() => _loadFile(_filePickerService.pickReportFile);
 
   Future<void> _openIncomingFile(Uri uri) {
     widget.onIncomingFile?.call();
@@ -311,7 +305,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Select a legacy report file from disk, or open one from WhatsApp, Files, or email with this app. Conversion happens locally and preserves rows, spacing, totals, page breaks, and column alignment.',
+          'Pick a report file, or open one from WhatsApp, Files, or email with this app. Conversion happens locally and preserves rows, spacing, totals, page breaks, and column alignment.',
           style: textTheme.bodyLarge?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
