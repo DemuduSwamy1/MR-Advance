@@ -15,7 +15,11 @@ import 'widgets/primary_action_button.dart';
 import 'widgets/warning_card.dart';
 
 class ConverterScreen extends StatefulWidget {
-  const ConverterScreen({super.key});
+  const ConverterScreen({super.key, this.onIncomingFile});
+
+  /// Called when another app opens or shares a file with this app, so the
+  /// home shell can switch to this tab.
+  final VoidCallback? onIncomingFile;
 
   @override
   State<ConverterScreen> createState() => _ConverterScreenState();
@@ -115,8 +119,10 @@ class _ConverterScreenState extends State<ConverterScreen> {
     () => _filePickerService.pickReportFile(allowAnyFile: allowAnyFile),
   );
 
-  Future<void> _openIncomingFile(Uri uri) =>
-      _loadFile(() => _incomingFileService.readFile(uri));
+  Future<void> _openIncomingFile(Uri uri) {
+    widget.onIncomingFile?.call();
+    return _loadFile(() => _incomingFileService.readFile(uri));
+  }
 
   Future<void> _loadFile(Future<SelectedReportFile?> Function() load) async {
     setState(() => _isPicking = true);

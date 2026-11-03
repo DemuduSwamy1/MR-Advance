@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../features/converter/presentation/converter_screen.dart';
+import 'home_shell.dart';
 import 'theme.dart';
 
 class LegacyReportConverterApp extends StatelessWidget {
@@ -13,7 +13,7 @@ class LegacyReportConverterApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
-      home: const ConverterScreen(),
+      home: const HomeShell(),
     );
   }
 }

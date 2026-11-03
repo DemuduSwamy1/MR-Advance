@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand teal, matches the Flutter theme seed colour. -->
+    <color name="ic_launcher_background">#246B5E</color>
+    <color name="splash_background">#246B5E</color>
+</resources>
