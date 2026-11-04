@@ -57,6 +57,15 @@ class FilePickerService {
       throw const ConversionException('The selected file is empty.');
     }
 
+    final binaryKind = binaryFileKind(bytes);
+    if (binaryKind != null) {
+      throw ConversionException(
+        '"$name" is not a text report; it looks like $binaryKind. '
+        'Choose the report file itself, such as a .txt, .prn, .dat, .lis, '
+        '.out or extension-less report.',
+      );
+    }
+
     final warnings = <String>[];
     if (isUnusuallyLargeReport(bytes.length)) {
       warnings.add(
