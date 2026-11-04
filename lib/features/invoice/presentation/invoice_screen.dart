@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/file_name_utils.dart';
 import '../../../core/utils/number_format.dart';
+import '../../../core/widgets/page_heading.dart';
 import '../../../core/widgets/pdf_preview_screen.dart';
 import '../../../core/widgets/primary_action_button.dart';
 import '../domain/models/invoice.dart';
@@ -78,189 +79,248 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       body: SafeArea(
         child: Form(
           key: _formKey,
-          // A scroll view (not a lazy ListView) keeps every field built, so
-          // validation also covers fields scrolled out of view.
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 980),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _Section(
-                      title: 'Bill details',
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: _field(
-                                _billNumber,
-                                'Bill No',
-                                capitalize: true,
-                                validator: (value) =>
-                                    RegExp(r'\d').hasMatch(value ?? '')
-                                    ? null
-                                    : 'Enter the bill number',
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(child: _dateField()),
-                          ],
-                        ),
-                        SegmentedButton<PaymentMode>(
-                          segments: const [
-                            ButtonSegment(
-                              value: PaymentMode.credit,
-                              label: Text('Credit'),
-                            ),
-                            ButtonSegment(
-                              value: PaymentMode.cash,
-                              label: Text('Cash'),
-                            ),
-                          ],
-                          selected: {_mode},
-                          onSelectionChanged: (selection) =>
-                              setState(() => _mode = selection.first),
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: 'From: ${_seller.name}',
-                      children: [
-                        _field(
-                          _sellerAddress,
-                          'Address',
-                          required: true,
-                          maxLines: 2,
-                          capitalize: true,
-                        ),
-                        _field(
-                          _sellerGstin,
-                          'GSTIN',
-                          required: true,
-                          capitalize: true,
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: 'Bill to',
-                      children: [
-                        _field(
-                          _buyerName,
-                          'Customer name',
-                          required: true,
-                          capitalize: true,
-                        ),
-                        _field(
-                          _buyerAddressLine1,
-                          'Address line 1',
-                          capitalize: true,
-                        ),
-                        _field(
-                          _buyerAddressLine2,
-                          'Address line 2',
-                          capitalize: true,
-                        ),
-                        _field(_buyerGstin, 'GSTIN', capitalize: true),
-                        ExpansionTile(
-                          title: const Text('More customer details'),
-                          tilePadding: EdgeInsets.zero,
-                          childrenPadding: const EdgeInsets.only(top: 8),
-                          shape: const Border(),
-                          collapsedShape: const Border(),
-                          children: [
-                            _field(
-                              _buyerPhone,
-                              'Phone',
-                              keyboardType: TextInputType.phone,
-                            ),
-                            _field(_buyerPan, 'PAN', capitalize: true),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _field(
-                                    _buyerDl20b,
-                                    'DL No. 20B',
-                                    capitalize: true,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _field(
-                                    _buyerDl21b,
-                                    'DL No. 21B',
-                                    capitalize: true,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _field(_partyCode, 'Party code'),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(child: _field(_state, 'State')),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: 'Items (${_items.length})',
-                      children: [
-                        if (_items.isEmpty)
-                          Text(
-                            'No items yet. Add the medicines on this bill.',
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        for (var i = 0; i < _items.length; i++)
-                          _ItemTile(
-                            serial: i + 1,
-                            item: _items[i],
-                            line: totals.lines[i],
-                            onTap: () => _editItem(i),
-                            onDelete: () => setState(() => _items.removeAt(i)),
-                          ),
-                        OutlinedButton.icon(
-                          onPressed: _addItem,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add item'),
-                        ),
-                      ],
-                    ),
-                    InvoiceTotalsCard(totals: totals),
-                    const SizedBox(height: 16),
-                    _field(_message, 'Message (optional)'),
-                    PrimaryActionButton(
-                      icon: Icons.picture_as_pdf_outlined,
-                      label: _isGenerating
-                          ? 'Generating...'
-                          : 'Generate Invoice PDF',
-                      onPressed: _isGenerating ? null : _generate,
-                      isLoading: _isGenerating,
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: _isGenerating ? null : _confirmNewInvoice,
-                      icon: const Icon(Icons.note_add_outlined),
-                      label: const Text('New invoice'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) =>
+                constraints.maxWidth >= wideLayoutBreakpoint
+                ? _buildWide(totals)
+                : _buildNarrow(totals),
           ),
         ),
       ),
     );
+  }
+
+  /// Phones: one scrolling column.
+  Widget _buildNarrow(InvoiceTotals totals) {
+    // A scroll view (not a lazy ListView) keeps every field built, so
+    // validation also covers fields scrolled out of view.
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 980),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ..._formSections(totals),
+              ..._summary(totals),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: _isGenerating ? null : _confirmNewInvoice,
+                icon: const Icon(Icons.note_add_outlined),
+                label: const Text('New invoice'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Wide screens: the form on the left and the totals with the Generate
+  /// button on the right, which stay in view while items are added.
+  Widget _buildWide(InvoiceTotals totals) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1280),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
+              child: PageHeading(
+                title: 'Create invoice',
+                description:
+                    'Fill in the bill, add the medicines and generate the '
+                    'GST tax invoice.',
+                actions: [
+                  OutlinedButton.icon(
+                    onPressed: _isGenerating ? null : _confirmNewInvoice,
+                    icon: const Icon(Icons.note_add_outlined),
+                    label: const Text('New invoice'),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(32, 0, 12, 32),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) => Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          // Bill details and From sit side by side only when
+                          // each still has room for its fields.
+                          children: _formSections(
+                            totals,
+                            sideBySide: constraints.maxWidth >= 720,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 380,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 32, 32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _summary(totals),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _formSections(InvoiceTotals totals, {bool sideBySide = false}) {
+    final billDetails = _Section(
+      title: 'Bill details',
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _field(
+                _billNumber,
+                'Bill No',
+                capitalize: true,
+                validator: (value) => RegExp(r'\d').hasMatch(value ?? '')
+                    ? null
+                    : 'Enter the bill number',
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: _dateField()),
+          ],
+        ),
+        SegmentedButton<PaymentMode>(
+          segments: const [
+            ButtonSegment(value: PaymentMode.credit, label: Text('Credit')),
+            ButtonSegment(value: PaymentMode.cash, label: Text('Cash')),
+          ],
+          selected: {_mode},
+          onSelectionChanged: (selection) =>
+              setState(() => _mode = selection.first),
+        ),
+      ],
+    );
+    final from = _Section(
+      title: 'From: ${_seller.name}',
+      children: [
+        _field(
+          _sellerAddress,
+          'Address',
+          required: true,
+          maxLines: 2,
+          capitalize: true,
+        ),
+        _field(_sellerGstin, 'GSTIN', required: true, capitalize: true),
+      ],
+    );
+    return [
+      if (sideBySide)
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: billDetails),
+              const SizedBox(width: 16),
+              Expanded(child: from),
+            ],
+          ),
+        )
+      else ...[
+        billDetails,
+        from,
+      ],
+      _Section(
+        title: 'Bill to',
+        children: [
+          _field(_buyerName, 'Customer name', required: true, capitalize: true),
+          _field(_buyerAddressLine1, 'Address line 1', capitalize: true),
+          _field(_buyerAddressLine2, 'Address line 2', capitalize: true),
+          _field(_buyerGstin, 'GSTIN', capitalize: true),
+          ExpansionTile(
+            title: const Text('More customer details'),
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(top: 8),
+            shape: const Border(),
+            collapsedShape: const Border(),
+            children: [
+              _field(_buyerPhone, 'Phone', keyboardType: TextInputType.phone),
+              _field(_buyerPan, 'PAN', capitalize: true),
+              Row(
+                children: [
+                  Expanded(
+                    child: _field(_buyerDl20b, 'DL No. 20B', capitalize: true),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _field(_buyerDl21b, 'DL No. 21B', capitalize: true),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(child: _field(_partyCode, 'Party code')),
+                  const SizedBox(width: 12),
+                  Expanded(child: _field(_state, 'State')),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      _Section(
+        title: 'Items (${_items.length})',
+        children: [
+          if (_items.isEmpty)
+            Text(
+              'No items yet. Add the medicines on this bill.',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          for (var i = 0; i < _items.length; i++)
+            _ItemTile(
+              serial: i + 1,
+              item: _items[i],
+              line: totals.lines[i],
+              onTap: () => _editItem(i),
+              onDelete: () => setState(() => _items.removeAt(i)),
+            ),
+          OutlinedButton.icon(
+            onPressed: _addItem,
+            icon: const Icon(Icons.add),
+            label: const Text('Add item'),
+          ),
+        ],
+      ),
+    ];
+  }
+
+  /// Totals, message and the Generate button.
+  List<Widget> _summary(InvoiceTotals totals) {
+    return [
+      InvoiceTotalsCard(totals: totals),
+      const SizedBox(height: 16),
+      _field(_message, 'Message (optional)'),
+      PrimaryActionButton(
+        icon: Icons.picture_as_pdf_outlined,
+        label: _isGenerating ? 'Generating...' : 'Generate Invoice PDF',
+        onPressed: _isGenerating ? null : _generate,
+        isLoading: _isGenerating,
+      ),
+    ];
   }
 
   Widget _field(

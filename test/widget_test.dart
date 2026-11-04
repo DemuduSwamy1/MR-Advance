@@ -39,7 +39,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byKey(HomeShell.sideBarKey), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
 
     await tester.tap(find.text('Invoice'));
@@ -52,6 +52,30 @@ void main() {
     await tester.pumpWidget(const LegacyReportConverterApp());
 
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.byType(NavigationRail), findsNothing);
+    expect(find.byKey(HomeShell.sideBarKey), findsNothing);
+  });
+
+  testWidgets('wide screens use the two-column layout', (tester) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildLightTheme(),
+        home: const HomeShell(useSideBar: true),
+      ),
+    );
+
+    expect(find.text('RAVITEJA MEDICALS'), findsOneWidget);
+    expect(find.text('Convert report to PDF'), findsOneWidget);
+    expect(find.text('How it works'), findsOneWidget);
+
+    await tester.tap(find.text('Invoice'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create invoice'), findsOneWidget);
+    expect(find.text('Generate Invoice PDF'), findsOneWidget);
+    expect(find.text('New invoice'), findsOneWidget);
   });
 }
