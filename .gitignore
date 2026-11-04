@@ -46,3 +46,6 @@ app.*.map.json
 
 # Kotlin compiler cache
 .kotlin/
+
+# Flutter SDK cloned by the Vercel build (see vercel.json)
+/flutter/
