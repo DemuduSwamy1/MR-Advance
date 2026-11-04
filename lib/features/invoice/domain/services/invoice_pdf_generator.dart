@@ -159,7 +159,7 @@ class InvoicePdfGenerator {
             quantityMilli: item.quantityMilli,
             freeMilli: item.freeMilli,
             ratePaise: item.ratePaise,
-            discountBasisPoints: item.discountBasisPoints,
+            discountPaise: item.discountPaise,
             gstPercent: item.gstPercent,
             marginBasisPoints: item.marginBasisPoints,
             scheme: item.scheme,
@@ -219,7 +219,7 @@ class InvoicePdfGenerator {
                   ),
                   _twoUp(
                     _pair('D20B :', seller.dl20b),
-                    _pair('D21B :', seller.dl21b),
+                    pw.Text('D21B : ${seller.dl21b}', style: text),
                   ),
                   _twoUp(
                     _pair('GSTN:', invoice.sellerGstin, bold: true),

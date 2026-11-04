@@ -83,8 +83,9 @@ enum PaymentMode {
   final String label;
 }
 
-/// One medicine row. Money is in paise, quantities in thousandths and the
-/// discount and margin in basis points (1% = 100) so calculations stay exact.
+/// One medicine row. Money (including the discount, which is entered by hand)
+/// is in paise, quantities in thousandths and the margin in basis points
+/// (1% = 100) so calculations stay exact.
 /// [marginBasisPoints] and [scheme] only drive the automatic rate and free
 /// quantity while editing; they are not printed.
 class InvoiceItem {
@@ -100,7 +101,7 @@ class InvoiceItem {
     this.mrpPaise = 0,
     this.revisedMrpPaise = 0,
     this.freeMilli = 0,
-    this.discountBasisPoints = 0,
+    this.discountPaise = 0,
     this.gstPercent = 5,
     this.marginBasisPoints = InvoiceItem.defaultMarginBasisPoints,
     this.scheme = '',
@@ -120,7 +121,7 @@ class InvoiceItem {
   final int quantityMilli;
   final int freeMilli;
   final int ratePaise;
-  final int discountBasisPoints;
+  final int discountPaise;
   final int gstPercent;
   final int marginBasisPoints;
   final String scheme;

@@ -73,7 +73,8 @@ class InvoiceCalculator {
 
   InvoiceLineTotals lineTotals(InvoiceItem item) {
     final amount = roundHalfUpDiv(item.ratePaise * item.quantityMilli, 1000);
-    final discount = roundHalfUpDiv(amount * item.discountBasisPoints, 10000);
+    // The discount is an amount typed in by hand, not a percentage.
+    final discount = item.discountPaise;
     final taxable = amount - discount;
     final halfTax = roundHalfUpDiv(taxable * item.gstPercent, 200);
 

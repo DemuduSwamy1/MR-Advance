@@ -70,10 +70,7 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
   late final _rate = TextEditingController(
     text: widget.initial == null ? '' : _plainAmount(widget.initial!.ratePaise),
   );
-  late final _discount = _scaledController(
-    widget.initial?.discountBasisPoints,
-    2,
-  );
+  late final _discount = _scaledController(widget.initial?.discountPaise, 2);
   late int _gstPercent =
       widget.initial?.gstPercent ?? widget.defaults?.gstPercent ?? 5;
 
@@ -169,7 +166,17 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
                 _freeField(),
               ]),
               _row([
-                _numberField(_discount, 'Disc %', decimals: 2, maximum: 10000),
+                _numberField(
+                  _discount,
+                  'Disc (₹)',
+                  decimals: 2,
+                  check: (paise) {
+                    final amount = _lineAmount();
+                    return amount != null && paise > amount
+                        ? 'More than the amount'
+                        : null;
+                  },
+                ),
                 _numberField(_revisedMrp, 'Rev. M.R.P', decimals: 2),
               ]),
               const SizedBox(height: 4),
@@ -230,6 +237,7 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
     bool required = false,
     bool positive = false,
     int? maximum,
+    String? Function(int value)? check,
     ValueChanged<String>? onChanged,
     String? helperText,
     Widget? suffixIcon,
@@ -264,7 +272,7 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
           if (maximum != null && parsed > maximum) {
             return 'Too large';
           }
-          return null;
+          return check?.call(parsed);
         },
       ),
     );
@@ -477,6 +485,15 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
     return free == null ? item.freeMilli != 0 : free != item.freeMilli;
   }
 
+  /// Qty × Rate in paise, or null while either is missing.
+  int? _lineAmount() {
+    final quantity = parseScaled(_quantity.text, decimals: 3);
+    final rate = parseScaled(_rate.text, decimals: 2);
+    return quantity == null || rate == null
+        ? null
+        : roundHalfUpDiv(rate * quantity, 1000);
+  }
+
   static String _plainAmount(int paise) =>
       '${paise ~/ 100}.${(paise % 100).toString().padLeft(2, '0')}';
 
@@ -501,7 +518,7 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
         revisedMrp == null ||
         free == null ||
         discount == null ||
-        discount > 10000 ||
+        discount > roundHalfUpDiv(rate * quantity, 1000) ||
         margin == null ||
         margin > 10000) {
       return null;
@@ -519,7 +536,7 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
       quantityMilli: quantity,
       freeMilli: free,
       ratePaise: rate,
-      discountBasisPoints: discount,
+      discountPaise: discount,
       gstPercent: _gstPercent,
       marginBasisPoints: margin,
       scheme: _scheme.text.replaceAll(' ', ''),

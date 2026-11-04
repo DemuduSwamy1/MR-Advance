@@ -30,7 +30,7 @@ Creates a TAX INVOICE matching the RAVITEJA MEDICALS printed bill.
 
 ### Adding a medicine
 
-Enter the name, HSN code (defaults to `300490`), MFR, pack, batch, expiry (month/year picker), MRP, GST %, Qty and, optionally, discount % and revised MRP. Two values are filled in for you:
+Enter the name, HSN code (defaults to `300490`), MFR, pack, batch, expiry (month/year picker), MRP, GST %, Qty and, optionally, the discount amount (₹, typed in; it is not calculated) and revised MRP. Two values are filled in for you:
 
 - **Rate** = MRP ÷ (1 + GST%) less the retailer **margin** (20% by default).
   Example: 189.83 ÷ 1.05 × 0.80 = **144.63**.
@@ -42,7 +42,7 @@ You can type over either value; a ↻ button switches back to the calculation. A
 
 All money is handled in whole paise, rounding halves up:
 
-- Amount = Qty × Rate; Taxable = Amount − Discount
+- Amount = Qty × Rate; Taxable = Amount − Discount (the discount entered for the item)
 - CGST = SGST = Taxable × GST% ÷ 2 per line; invoice tax is totalled per GST slab (0, 5, 12, 18, 28%)
 - Net amount = Taxable + CGST + SGST, rounded to the nearest rupee, with the round-off shown
 - The amount in words uses Indian numbering (thousand, lakh, crore)

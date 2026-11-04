@@ -109,13 +109,13 @@ void main() {
       expect(free(20, '0+1'), isNull);
     });
 
-    test('applies discounts before tax', () {
+    test('subtracts the manual discount amount before tax', () {
       final line = calculator.lineTotals(
         const InvoiceItem(
           productName: 'TEST',
           quantityMilli: 10000,
           ratePaise: 10000,
-          discountBasisPoints: 1000,
+          discountPaise: 10000,
           gstPercent: 12,
         ),
       );
