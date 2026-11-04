@@ -67,7 +67,7 @@ void main() {
       ),
     );
 
-    expect(find.text('RAVITEJA MEDICALS'), findsOneWidget);
+    expect(find.text('ReportKit'), findsOneWidget);
     expect(find.text('Convert report to PDF'), findsOneWidget);
     expect(find.text('How it works'), findsOneWidget);
 
