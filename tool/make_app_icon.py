@@ -184,6 +184,19 @@ if os.path.isdir(os.path.dirname(win_ico)):
     rounded(render(256), 0.2).save(
         win_ico, sizes=[(s, s) for s in (16, 24, 32, 48, 64, 128, 256)])
 
+# Web: favicon, PWA icons and maskable icons (art kept inside the 80% safe zone).
+web_dir = os.path.join(ROOT, "web")
+if os.path.isdir(web_dir):
+    os.makedirs(f"{web_dir}/icons", exist_ok=True)
+    rounded(render(64), 0.22).save(f"{web_dir}/favicon.png")
+    for px in (192, 512):
+        rounded(render(px), 0.22).save(f"{web_dir}/icons/Icon-{px}.png")
+        maskable = Image.new("RGBA", (px, px), BG)
+        inner = round(px * 0.82)
+        offset = (px - inner) // 2
+        maskable.alpha_composite(render(inner), (offset, offset))
+        maskable.save(f"{web_dir}/icons/Icon-maskable-{px}.png")
+
 # Master artwork for store listings and future use.
 icon_dir = os.path.join(ROOT, "assets/icon")
 os.makedirs(icon_dir, exist_ok=True)

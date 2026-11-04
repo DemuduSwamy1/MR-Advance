@@ -53,6 +53,22 @@ ThemeData _baseTheme(ColorScheme colorScheme) {
         ),
       ),
     ),
+    navigationRailTheme: NavigationRailThemeData(
+      backgroundColor: colorScheme.surface,
+      indicatorColor: colorScheme.primaryContainer,
+      selectedLabelTextStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: colorScheme.primary,
+      ),
+      unselectedLabelTextStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: colorScheme.onSurfaceVariant,
+      ),
+      selectedIconTheme: IconThemeData(color: colorScheme.onPrimaryContainer),
+      unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
+    ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       showCloseIcon: true,

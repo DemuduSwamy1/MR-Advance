@@ -16,13 +16,14 @@ class IncomingFileService {
 
   final FilePickerService _filePickerService;
 
-  bool get _isSupported =>
+  /// Only the Android app can receive files from other apps.
+  static bool get isSupported =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
   /// Calls [onFile] for the file that launched the app, if any, and for every
   /// file shared while the app is running.
   Future<void> listen(void Function(Uri uri) onFile) async {
-    if (!_isSupported) {
+    if (!isSupported) {
       return;
     }
 
@@ -45,7 +46,7 @@ class IncomingFileService {
   }
 
   void dispose() {
-    if (_isSupported) {
+    if (isSupported) {
       _channel.setMethodCallHandler(null);
     }
   }

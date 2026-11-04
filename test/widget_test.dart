@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:legacy_report_converter/app/app.dart';
+import 'package:legacy_report_converter/app/home_shell.dart';
+import 'package:legacy_report_converter/app/theme.dart';
 
 void main() {
   testWidgets('converter screen renders primary actions', (tester) async {
@@ -26,5 +29,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Select Report File'), findsOneWidget);
+  });
+
+  testWidgets('the website shows the tabs in a left side bar', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildLightTheme(),
+        home: const HomeShell(useSideBar: true),
+      ),
+    );
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await tester.tap(find.text('Invoice'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bill details'), findsOneWidget);
+  });
+
+  testWidgets('the apps keep the bottom bar', (tester) async {
+    await tester.pumpWidget(const LegacyReportConverterApp());
+
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NavigationRail), findsNothing);
   });
 }

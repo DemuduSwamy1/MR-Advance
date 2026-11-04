@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -207,7 +208,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
     setState(() => _isSaving = true);
     try {
-      final uri = await _fileSaveService.savePdf(
+      final saved = await _fileSaveService.savePdf(
         fileName: result.outputFileName,
         bytes: result.pdfBytes,
       );
@@ -216,10 +217,14 @@ class _ConverterScreenState extends State<ConverterScreen> {
         return;
       }
 
-      if (uri == null) {
+      if (!saved) {
         _showMessage('Save canceled.');
       } else {
-        _showMessage('Saved ${result.outputFileName}.');
+        _showMessage(
+          kIsWeb
+              ? 'Downloaded ${result.outputFileName}.'
+              : 'Saved ${result.outputFileName}.',
+        );
       }
     } catch (error) {
       if (mounted) {
@@ -240,7 +245,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
     setState(() => _isSharing = true);
     try {
-      final file = await _fileSaveService.writeTemporaryPdf(
+      final file = await _fileSaveService.shareablePdf(
         fileName: result.outputFileName,
         bytes: result.pdfBytes,
       );
@@ -248,13 +253,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
         ShareParams(
           title: 'Share converted report',
           subject: result.outputFileName,
-          files: [
-            XFile(
-              file.path,
-              name: result.outputFileName,
-              mimeType: 'application/pdf',
-            ),
-          ],
+          files: [file],
         ),
       );
     } catch (error) {
@@ -310,7 +309,9 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Pick a report file, or open one from WhatsApp, Files, or email with this app. Conversion happens locally and preserves rows, spacing, totals, page breaks, and column alignment.',
+          IncomingFileService.isSupported
+              ? 'Pick a report file, or open one from WhatsApp, Files, or email with this app. Conversion happens locally and preserves rows, spacing, totals, page breaks, and column alignment.'
+              : 'Pick a report file from this device. Conversion happens locally and preserves rows, spacing, totals, page breaks, and column alignment.',
           style: textTheme.bodyLarge?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),

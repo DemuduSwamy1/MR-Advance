@@ -6,7 +6,7 @@ A Flutter app for a pharmacy wholesaler (RAVITEJA MEDICALS) with two tools:
 - **Invoice**: creates GST tax invoices in the same layout as the printed bills.
 
 Everything runs on the device; no files or invoice data leave the phone.
-Platforms: Android (main target), macOS and Windows.
+Platforms: Android (main target), web browsers, macOS and Windows.
 
 ## Convert tab
 
@@ -85,6 +85,30 @@ flutter build apk --release
 
 The APK is written to `build/app/outputs/flutter-apk/app-release.apk`. It is currently signed with the debug key: fine for installing directly, but Google Play needs a release signing key and a proper application ID (the app still uses `com.example.legacy_report_converter` so existing installs keep updating).
 
+### Web version
+
+The same app runs in a browser. Opening files from WhatsApp is Android-only; on the web you pick the report with *Select Report File*. *Save PDF* downloads the file, and *Share PDF* opens the share sheet on phones (desktop browsers download it instead). Reports and invoices are processed in the browser and never uploaded.
+
+Run it in Chrome while developing:
+
+```sh
+flutter run -d chrome
+```
+
+Build the site:
+
+```sh
+flutter build web --release
+```
+
+The site is written to `build/web`. Upload that folder to any static host (GitHub Pages, Firebase Hosting, Netlify, or a plain web server). If it is served from a sub-folder, such as `https://example.com/reportkit/`, build with `--base-href /reportkit/`. To try the build locally:
+
+```sh
+python3 -m http.server 8080 --directory build/web
+```
+
+Then open http://localhost:8080.
+
 ### App icon
 
 The icon (a report sheet with a convert badge on teal) and the splash screen are generated from one script. After editing it, run:
@@ -93,4 +117,4 @@ The icon (a report sheet with a convert badge on teal) and the splash screen are
 python3 tool/make_app_icon.py .
 ```
 
-It needs [Pillow](https://pypi.org/project/pillow/) and writes the Android adaptive and legacy icons, macOS and Windows icons, and the `assets/icon/` artwork.
+It needs [Pillow](https://pypi.org/project/pillow/) and writes the Android adaptive and legacy icons, macOS and Windows icons, the web favicon and PWA icons, and the `assets/icon/` artwork.
