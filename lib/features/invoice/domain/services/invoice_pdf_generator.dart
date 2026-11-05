@@ -259,7 +259,7 @@ class InvoicePdfGenerator {
                     _pair('Pan No:', buyer.pan),
                   ),
                   _twoUp(
-                    _pair('DL.No. 20B:', buyer.dl20b, labelWidth: 52),
+                    _pair('DL.No. 20B:', buyer.dl20b),
                     _pair('21B:', buyer.dl21b, boldLabel: true),
                   ),
                 ],
@@ -704,37 +704,35 @@ class InvoicePdfGenerator {
     );
   }
 
+  /// A label followed by its value after a single space, e.g. "PAN : AAOF...".
   pw.Widget _pair(
     String label,
     String value, {
     bool bold = false,
     bool boldLabel = false,
-    double labelWidth = 42,
   }) {
-    return pw.Row(
-      children: [
-        pw.SizedBox(
-          width: labelWidth,
-          child: pw.Text(
-            label,
+    return pw.RichText(
+      maxLines: 1,
+      overflow: pw.TextOverflow.clip,
+      text: pw.TextSpan(
+        style: const pw.TextStyle(fontSize: 9),
+        children: [
+          pw.TextSpan(
+            text: '$label ',
             style: pw.TextStyle(
-              fontSize: 9,
               fontWeight: bold || boldLabel
                   ? pw.FontWeight.bold
                   : pw.FontWeight.normal,
             ),
           ),
-        ),
-        pw.Expanded(
-          child: pw.Text(
-            value,
+          pw.TextSpan(
+            text: value,
             style: pw.TextStyle(
-              fontSize: 9,
               fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
