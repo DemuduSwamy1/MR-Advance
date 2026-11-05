@@ -109,6 +109,8 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
     final textTheme = Theme.of(context).textTheme;
     final isEditing = widget.initial != null;
     final preview = _tryBuildItem();
+    final line = preview == null ? null : _calculator.lineTotals(preview);
+    final amount = _lineAmount();
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
@@ -124,11 +126,14 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
                 style: textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              _textField(_productName, 'Medicine name', required: true),
+              // Fields follow the bill's item columns from MFR to TOTAL.
+              // Scheme and Margin % are not printed; they only fill in Free
+              // and Rate. Grey fields are calculated.
               _row([
-                _textField(_hsnCode, 'HSN code', numeric: true),
                 _textField(_manufacturer, 'MFR'),
+                _textField(_hsnCode, 'HSN code', numeric: true),
               ]),
+              _textField(_productName, 'Product name', required: true),
               _row([
                 _textField(_pack, 'Pack'),
                 _textField(_batch, 'Batch'),
@@ -141,17 +146,7 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
                   decimals: 2,
                   onChanged: (_) => _recalculate(),
                 ),
-                _gstField(),
-              ]),
-              _row([
-                _numberField(
-                  _margin,
-                  'Margin %',
-                  decimals: 2,
-                  maximum: 10000,
-                  onChanged: (_) => _recalculate(),
-                ),
-                _rateField(),
+                _numberField(_revisedMrp, 'Rev. M.R.P', decimals: 2),
               ]),
               _row([
                 _numberField(
@@ -167,20 +162,35 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
               ]),
               _row([
                 _numberField(
+                  _margin,
+                  'Margin %',
+                  decimals: 2,
+                  maximum: 10000,
+                  helperText: 'Not printed',
+                  onChanged: (_) => _recalculate(),
+                ),
+                _rateField(),
+              ]),
+              _row([
+                _calculatedField('Amount', amount),
+                _numberField(
                   _discount,
                   'Disc (₹)',
                   decimals: 2,
-                  check: (paise) {
-                    final amount = _lineAmount();
-                    return amount != null && paise > amount
-                        ? 'More than the amount'
-                        : null;
-                  },
+                  check: (paise) => amount != null && paise > amount
+                      ? 'More than the amount'
+                      : null,
                 ),
-                _numberField(_revisedMrp, 'Rev. M.R.P', decimals: 2),
               ]),
-              const SizedBox(height: 4),
-              if (preview != null) _LinePreview(item: preview),
+              _row([
+                _calculatedField('Taxable amt', line?.taxablePaise),
+                _gstField(),
+              ]),
+              _row([
+                _calculatedField('CGST amt', line?.cgstPaise),
+                _calculatedField('SGST amt', line?.sgstPaise),
+              ]),
+              _calculatedField('Total', line?.totalPaise, emphasize: true),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: _submit,
@@ -203,6 +213,36 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
           Expanded(child: fields[i]),
         ],
       ],
+    );
+  }
+
+  /// A read-only box showing a value worked out from the other fields.
+  Widget _calculatedField(String label, int? paise, {bool emphasize = false}) {
+    final theme = Theme.of(context);
+    final style = emphasize
+        ? theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.primary,
+          )
+        : theme.textTheme.bodyLarge;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          filled: true,
+          fillColor: theme.colorScheme.surfaceContainerHighest,
+          suffixIcon: const Icon(Icons.calculate_outlined, size: 20),
+        ),
+        child: Text(
+          paise == null ? '—' : '₹ ${formatAmount(paise)}',
+          style: style,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 
@@ -332,6 +372,7 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
         decoration: const InputDecoration(
           labelText: 'Scheme',
           hintText: '10+1',
+          helperText: 'Not printed',
           border: OutlineInputBorder(),
         ),
         keyboardType: TextInputType.text,
@@ -551,66 +592,5 @@ class _InvoiceItemSheetState extends State<InvoiceItemSheet> {
     if (item != null) {
       Navigator.of(context).pop(item);
     }
-  }
-}
-
-/// Shows the calculated values for the item being edited.
-class _LinePreview extends StatelessWidget {
-  const _LinePreview({required this.item});
-
-  final InvoiceItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final line = const InvoiceCalculator().lineTotals(item);
-
-    Widget value(String label, int paise) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(formatAmount(paise), style: textTheme.bodyMedium),
-        ],
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 20,
-            runSpacing: 8,
-            children: [
-              value('Amount', line.amountPaise),
-              value('Discount', line.discountPaise),
-              value('Taxable', line.taxablePaise),
-              value('CGST', line.cgstPaise),
-              value('SGST', line.sgstPaise),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Line total  ₹ ${formatAmount(line.totalPaise)}',
-            style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.primary,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

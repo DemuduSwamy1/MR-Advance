@@ -589,11 +589,18 @@ class _ItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    // Same order as the bill's columns.
     final details = [
+      if (item.manufacturer.isNotEmpty) item.manufacturer,
       if (item.hsnCode.isNotEmpty) 'HSN ${item.hsnCode}',
+      if (item.pack.isNotEmpty) 'Pack ${item.pack}',
+      if (item.batch.isNotEmpty) 'Batch ${item.batch}',
+      if (item.expiry.isNotEmpty) 'Exp ${item.expiry}',
+      if (item.mrpPaise > 0) 'MRP ${formatAmount(item.mrpPaise)}',
       'Qty ${formatQuantity(item.quantityMilli)}'
           '${item.freeMilli > 0 ? ' + ${formatQuantity(item.freeMilli)} free' : ''}',
       'Rate ${formatAmount(item.ratePaise)}',
+      if (item.discountPaise > 0) 'Disc ${formatAmount(item.discountPaise)}',
       'GST ${item.gstPercent}%',
     ].join('  ·  ');
 
