@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/cloud/cloud_sync.dart';
 import '../../../core/exceptions/conversion_exception.dart';
 import '../../../core/widgets/page_heading.dart';
 import '../../../core/widgets/pdf_preview_screen.dart';
@@ -232,6 +235,11 @@ class _ConverterScreenState extends State<ConverterScreen> {
         fileWarnings: selectedFile.warnings,
       );
 
+      unawaited(
+        CloudSync.instance.recordReportConverted(
+          pageCount: result.pages.length,
+        ),
+      );
       if (mounted) {
         setState(() {
           _result = result;

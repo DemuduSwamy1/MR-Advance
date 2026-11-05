@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1073857056371",
+    "project_id": "reportkit-f8a58",
+    "storage_bucket": "reportkit-f8a58.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1073857056371:android:2f58255333d194ce16a406",
+        "android_client_info": {
+          "package_name": "com.coderswamy.reportkit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy8NbFlTXZQ7QXwW3FWLUPxRl2_EyDux4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

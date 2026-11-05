@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// Each phone or browser signs in anonymously and may only write its own
+// data. Nobody can read bills from the app; read them in the Firebase
+// console, which is not limited by these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    match /bills/{billId} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && billId.matches(request.auth.uid + '_.*');
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+      allow read, delete: if false;
+    }
+
+    match /users/{userId} {
+      allow create, update: if signedIn() && request.auth.uid == userId;
+      allow read, delete: if false;
+
+      match /sessions/{sessionId} {
+        allow create: if signedIn() && request.auth.uid == userId;
+        allow read, update, delete: if false;
+      }
+    }
+  }
+}

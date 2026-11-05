@@ -51,17 +51,53 @@ The totals card updates as items change. *Generate Invoice PDF* opens a preview 
 
 Invoice data is not saved between app launches yet.
 
+## Cloud saving (Firebase)
+
+When Firebase is connected, the app saves to the cloud in the background, with no extra steps for the user:
+
+- **Bills:** every time *Generate Invoice PDF* is pressed, the bill (customer, items, totals) is saved to the `bills` collection. Generating the same bill number again on the same day updates the saved copy instead of adding a duplicate.
+- **Users:** each phone or browser signs in anonymously and gets its own `users/{id}` record with device details (maker, model, OS or browser, app version), first and last seen, and counts of sessions, bills and converted reports. No hardware IDs such as the IMEI are collected, and converted reports are only counted, never uploaded.
+- **Sessions:** one `users/{id}/sessions` record each time the app is opened, or reopened after 30 minutes in the background. Firebase Analytics also reports users, sessions and devices on its dashboard (with up to a day's delay).
+
+Offline, saves wait on the device and are sent when the connection returns. Until Firebase is connected (see below), `lib/firebase_options.dart` is a placeholder and the app works without cloud saving.
+
+### Connecting the Firebase project
+
+1. In the [Firebase console](https://console.firebase.google.com), open the project and turn on **Authentication → Sign-in method → Anonymous**, and create a **Firestore Database**.
+2. Sign the Firebase CLI in to the Google account that owns the project:
+
+   ```sh
+   firebase login:add
+   ```
+
+3. Register the Android and web apps and write `lib/firebase_options.dart` (replace `PROJECT_ID` and `EMAIL`):
+
+   ```sh
+   ~/.pub-cache/bin/flutterfire configure --project=PROJECT_ID --account=EMAIL --platforms=android,web --android-package-name=com.coderswamy.reportkit
+   ```
+
+4. Publish the security rules in `firestore.rules`, which let each device add only its own data:
+
+   ```sh
+   firebase deploy --only firestore:rules --project PROJECT_ID --account EMAIL
+   ```
+
+5. Commit the generated `lib/firebase_options.dart` and `android/app/google-services.json` so the Vercel build uses them. Their keys identify the project and are not secret; the security rules protect the data.
+
+Bills and users are read in the Firebase console under *Firestore Database*; user and session numbers are under *Analytics*.
+
 ## Project structure
 
 ```
 lib/
   app/                    App shell: header, bottom navigation, theme
   core/
+    cloud/                Firebase: saving bills, users and sessions; device details
     utils/                Number and amount formatting, amount in words, file checks
     widgets/              PDF preview, month/year picker, shared buttons
   features/
     converter/            Report reading, decoding, printer-control parsing, PDF output
-    invoice/              Invoice model, GST calculator, invoice PDF, form and item sheet
+    invoice/              Invoice model, GST calculator, invoice PDF, bill record, form and item sheet
 test/                     Unit and widget tests (calculations, file checks, UI)
 tool/make_app_icon.py     Generates the app icon and splash artwork
 ```
@@ -83,7 +119,7 @@ flutter run
 flutter build apk --release
 ```
 
-The APK is written to `build/app/outputs/flutter-apk/app-release.apk`. It is currently signed with the debug key: fine for installing directly, but Google Play needs a release signing key and a proper application ID (the app still uses `com.example.legacy_report_converter` so existing installs keep updating).
+The APK is written to `build/app/outputs/flutter-apk/app-release.apk`. It is currently signed with the debug key: fine for installing directly, but Google Play needs a release signing key. The application ID is `com.coderswamy.reportkit`; builds made before it changed (`com.example.legacy_report_converter`) install as a separate app, so uninstall the old one.
 
 ### Web version
 

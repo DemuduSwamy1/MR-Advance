@@ -1,0 +1,30 @@
+{
+  "auth": {
+    "providers": {
+      "anonymous": true
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "reportkit-f8a58",
+          "appId": "1:1073857056371:android:2f58255333d194ce16a406",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "reportkit-f8a58",
+          "configurations": {
+            "android": "1:1073857056371:android:2f58255333d194ce16a406",
+            "web": "1:1073857056371:web:174244e4b32ba48516a406"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../../core/cloud/cloud_sync.dart';
 import '../../../core/utils/file_name_utils.dart';
 import '../../../core/utils/number_format.dart';
 import '../../../core/widgets/page_heading.dart';
@@ -447,6 +450,10 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     try {
       final invoice = _buildInvoice();
       final bytes = await _pdfGenerator.generate(invoice);
+      // Saved to the cloud in the background; no action needed from the user.
+      unawaited(
+        CloudSync.instance.saveBill(invoice, _calculator.totals(invoice.items)),
+      );
       if (!mounted) {
         return;
       }
